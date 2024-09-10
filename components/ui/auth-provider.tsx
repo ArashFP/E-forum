@@ -13,9 +13,7 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthContextProviderProps {
-    children: ReactNode;
-}
+
 
 const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     const [user, setUser] = useState<User | null>(null);
