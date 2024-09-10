@@ -11,7 +11,7 @@ function AuthLayout({ children }: AuthLayoutProps) {
 
   useEffect(() => {
     if (authLoaded && user) {
-      router.push('/admin');
+      router.push('/');
     }
   }, [authLoaded, user, router]);
 
