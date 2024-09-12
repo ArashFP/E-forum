@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '@/firebase/config'; 
 
 const CreateThread = () => {
@@ -14,20 +14,20 @@ const CreateThread = () => {
   const router = useRouter();
 
   const handleCreateThread = async () => {
-    const newThread: Thread = {
-      id: Math.random().toString(10).substring(2, 9),
-      title,
-      category,
-      creationDate: new Date().toISOString(),
-      description,
-      creator,
-      comments: [],
-      locked: false,
-    };
-
     try {
-      await addDoc(collection(db, 'threads'), newThread);
-      console.log('Thread saved to Firestore:', newThread);
+      const docRef = await doc(collection(db, 'threads'));
+      await setDoc(docRef, {
+        id: docRef.id,
+        title,
+        category,
+        creationDate: new Date().toISOString(),
+        description,
+        creator,
+        comments: [],
+        locked: false,
+      })
+      console.log('Thread saved to Firestore:');
+      console.log(docRef.id)
       router.push('/');
     } catch (error) {
       console.error('Error saving thread to Firestore:', error);
