@@ -16,7 +16,6 @@ const Navbar = () => {
       if (user) {
         setIsLoggedIn(true);
         const userDoc = await getDoc(doc(db, "users", user.uid));
-        console.log(userDoc)
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setUserName(userData.firstName || "Username");
