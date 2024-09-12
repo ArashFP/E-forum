@@ -12,7 +12,7 @@ const SignUpPage = () => {
   const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
   const router = useRouter();
 
   const handleSignUp = async (email: string, password: string, name: string) => {
@@ -24,7 +24,7 @@ const SignUpPage = () => {
       const db = getFirestore();
       await addDoc(collection(db, "users"), {
         uid: user.uid,
-        name: name,
+        firstName: firstName,
         email: email,
       });
 
@@ -44,7 +44,7 @@ const SignUpPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleSignUp(email, password, name);
+    handleSignUp(email, password, firstName);
   };
 
   return (
@@ -55,12 +55,12 @@ const SignUpPage = () => {
         {success && <p className="text-green-500 text-center">User created successfully!</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name:</label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">First Name:</label>
             <input
               type="text"
               id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               required
             />
