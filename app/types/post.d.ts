@@ -3,6 +3,8 @@ type ThreadCategory = "Thread" | "QNA"
 type User = {
   userName: string,
   password: string,  
+  email: string,
+  
 }
 
 type Thread =  {
