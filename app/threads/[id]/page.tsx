@@ -59,12 +59,12 @@ const ThreadDetail = () => {
   }
 
   return (
-    <div className="bg-teal-400 h-screen font-serif">
+    <div className="bg-gray-700 h-screen font-serif">
       <Navbar />
       <main className="flex items-center justify-center p-10">
-        <div className="grid-cols-1 bg-blue md:grid-cols-2">
+        <div className="grid-cols-1 bg-gray-400 md:grid-cols-2">
           <div className="flex items-center justify-center flex-col">
-            <div className="w-[700px] border-2 shadow-xl border-opacity-50 mt-3 p-9 rounded">
+            <div className="w-[700px]  shadow-xl border-opacity-50 mt-3 p-9 rounded">
               <h1 className="font-bold text-center mt-7 text-5xl text-white">{thread.title}</h1>
               <p className="font-bold text-start text-2xl mt-10 py-3 text-white">{thread.description}</p>
               <p className="text-sm m-2 text-right text-gray-500 font-bold">{new Date(thread.creationDate).toLocaleString()}</p>
@@ -96,12 +96,6 @@ const ThreadDetail = () => {
                 )}
               </div>
             </div>
-            <button
-              className="mt-4 bg-gray-500 text-white px-3 rounded"
-              onClick={() => router.back()}
-            >
-              Go Back
-            </button>
           </div>
         </div>
       </main>

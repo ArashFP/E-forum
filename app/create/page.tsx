@@ -3,8 +3,7 @@ import Navbar from "../_components/navbar";
 
 export default function Create() {
   return (
-    <div className="bg-teal-400 min-h-screen font-serif">
-
+    <div className="bg-gray-700 h-full font-serif">
        <Navbar/>
         <h1 className="font-bold mt-10 font-serif text-center text-6xl text-white">Create Thread</h1>
         <div className="m-5 w-1/2 mx-auto">

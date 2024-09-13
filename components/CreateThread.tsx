@@ -35,17 +35,16 @@ const CreateThread = () => {
   };
 
   return (
-    <main className="bg-teal-400 border-2 flex items-center justify-center p-10 shadow-xl">
-      <div className="w-[800px] h-full grid-cols-1 bg-blue md:grid-cols-2">
-        <div className="bg-teal-400 h-full text-white pt-5 items-center justify-center">
-          <div className=""></div>
+    <main className="bg-gray-400 border-2 border-black flex items-center justify-center p-10 shadow-xl">
+      <div className="w-[800px] grid-cols-1 bg-blue md:grid-cols-2">
+        <div className="bg-gray-400 h-full text-black pt-5 items-center justify-center">
           <div className="mx-auto w-full p-6 rounded">
             <h1 className="text-2xl font-bold mb-4">Create new thread:</h1>
             <form onSubmit={(e) => { e.preventDefault(); handleCreateThread(); }}>
               <div className="mb-4">
-                <label htmlFor="title" className="block mt-4 text-lg text-white">Title:</label>
+                <label htmlFor="title" className="block mt-4 text-lg text-black">Title:</label>
                 <input
-                  className="mt-2 mb-4 bg-transparent rounded-full border p-2 w-full"
+                  className="mt-2 mb-4 bg-transparent rounded-full border border-black p-2 w-full"
                   type="text"
                   id="title"
                   placeholder="Thread name"
@@ -54,9 +53,9 @@ const CreateThread = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="Category" className="block mt-4 text-lg text-white">Category:</label>
+                <label htmlFor="Category" className="block mt-4 text-lg text-black">Category:</label>
                 <select
-                  className="mt-2 mb-4 bg-transparent rounded-full border p-2"
+                  className="mt-2 mb-4 bg-white rounded-full border border-black p-2"
                   id="Category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ThreadCategory)}
@@ -66,9 +65,9 @@ const CreateThread = () => {
                 </select>
               </div>
               <div className="mb-4">
-                <label htmlFor="content" className="block mt-4 text-lg text-white">Content:</label>
+                <label htmlFor="content" className="block mt-4 text-lg text-black">Content:</label>
                 <textarea
-                  className="mt-2 mb-4 bg-transparent rounded-lg w-full h-32 border p-2"
+                  className="mt-2 mb-4 bg-transparent rounded-lg w-full h-32 border p-2 border-black"
                   id="content"
                   placeholder="Write your content here"
                   value={description}
@@ -76,7 +75,7 @@ const CreateThread = () => {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <button type="submit" className="w-full mt-6 text-white border-2 h-12 rounded-full hover:text-emerald-400 hover:bg-white">Create new thread</button>
+                <button type="submit" className="w-full mt-6 text-black border-black border-2 h-12 rounded-full hover:bg-white">Create new thread</button>
               </div> 
             </form>
           </div>
