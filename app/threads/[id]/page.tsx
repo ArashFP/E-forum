@@ -5,12 +5,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/config';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
 
 const ThreadDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [thread, setThread] = useState<Thread | null>(null);
   const [comment, setComment] = useState<string>("");
-
+  const [checkedCommentId, setCheckedCommentId] = useState<string | null>(null);
   const router = useRouter()
 
   useEffect(() => {
@@ -32,7 +34,7 @@ const ThreadDetail = () => {
   const handleAddComment = async () => {
     if (thread && comment && !thread.locked) {
       const newComment: ThreadComment = {
-        id: Math.random().toString(36).substring(2, 9), // Generate a random string ID
+        id: Math.random().toString(36).substring(2, 9),
         thread: thread.id,
         content: comment,
         creator: { userName: "Anonymous", password: "", email: "example@mail.com" },
@@ -54,6 +56,10 @@ const ThreadDetail = () => {
     }
   };
 
+  const toggleCheckComment = (commentId: string) => {
+    setCheckedCommentId(prevId => (prevId === commentId ? null : commentId));
+  };
+
   if (!thread) {
     return <p className="text-red-500 text-center text-8xl">Thread not found.</p>;
   }
@@ -72,7 +78,18 @@ const ThreadDetail = () => {
               <div className="my-4 p-9">
                 {thread.comments.map(comment => (
                   <div key={comment.id} className="mb-4">
-                    <p className="bg-slate-200 rounded p-2 text-teal-900">{comment.content}</p>
+                    <p className={`rounded p-2 text-teal-900 ${checkedCommentId === comment.id ? 'bg-green-200 border border-green-500' : 'bg-slate-200'}`}>                        
+                      {comment.content}
+                      {thread.category === "QNA" && (
+                        <button
+                          className={`ml-2 float-right ${checkedCommentId === comment.id ? 'text-green-500' : 'text-red-500'}`}
+                          onClick={() => toggleCheckComment(comment.id)}
+                          title={checkedCommentId === comment.id ? 'Uncheck Comment' : 'Check Comment'}
+                        >
+                          <FontAwesomeIcon icon={faCheck} className='text-2xl' />
+                        </button>
+                      )}
+                    </p>
                     <p className="text-white">{comment.creator.userName}</p>
                   </div>
                 ))}
@@ -81,7 +98,7 @@ const ThreadDetail = () => {
                     <hr className="mt-7" />
                     <div className='relative flex items-center right-5 mt-2 w-[600px]'>
                       <div
-                        className="text-white m-4 p-5 rounded-md w-[800px] h-[80px] border border-white-300"
+                        className="text-white bg-white m-4 p-5 rounded-md w-[800px] h-[80px] border border-white-300"
                         contentEditable
                         onInput={(e) => setComment((e.target as HTMLDivElement).innerText)}
                       />
