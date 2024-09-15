@@ -18,15 +18,18 @@ const ThreadDetail = () => {
 
   useEffect(() => {
     const fetchThread = async () => {
-      if (id) {
+      if (id) { 
+        //find document with id from params, this becomes the docSnap
         const docRef = doc(db, 'threads', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
+          //if docSnap exists, set the thread to the data of the docSnap(document)
           const threadData = docSnap.data() as Thread;
           setThread(threadData);
-
+          //find the first comment that is checked and set the checkedCommentId to the id of that comment
           const checkedComment = threadData.comments.find(comment => comment.isChecked);
           if (checkedComment) {
+            //set the checkedCommentId to the id of the checked comment
             setCheckedCommentId(checkedComment.id);
           }
         } else {
