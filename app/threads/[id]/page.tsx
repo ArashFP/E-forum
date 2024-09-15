@@ -4,16 +4,17 @@ import Navbar from '@/app/_components/navbar';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '@/firebase/config';
+import { auth, db } from '@/firebase/config';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const ThreadDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [thread, setThread] = useState<Thread | null>(null);
   const [comment, setComment] = useState<string>("");
   const [checkedCommentId, setCheckedCommentId] = useState<string | null>(null);
-  const router = useRouter()
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchThread = async () => {
@@ -21,15 +22,28 @@ const ThreadDetail = () => {
         const docRef = doc(db, 'threads', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setThread(docSnap.data() as Thread);
+          const threadData = docSnap.data() as Thread;
+          setThread(threadData);
+
+          const checkedComment = threadData.comments.find(comment => comment.isChecked);
+          if (checkedComment) {
+            setCheckedCommentId(checkedComment.id);
+          }
         } else {
           console.log("No such document!");
         }
       }
     };
-
+  
     fetchThread();
   }, [id]);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleAddComment = async () => {
     if (thread && comment && !thread.locked) {
@@ -38,6 +52,7 @@ const ThreadDetail = () => {
         thread: thread.id,
         content: comment,
         creator: { userName: "Anonymous", password: "", email: "example@mail.com" },
+        isChecked: false,
       };
 
       const updatedThread = {
@@ -56,9 +71,34 @@ const ThreadDetail = () => {
     }
   };
 
-  const toggleCheckComment = (commentId: string) => {
-    setCheckedCommentId(prevId => (prevId === commentId ? null : commentId));
-  };
+const toggleCheckComment = async (commentId: string) => {
+  if (thread) {
+    const updatedComments = thread.comments.map(comment => {
+      if (comment.id === commentId) {
+        // Toggle the isChecked status of the clicked comment
+        return { ...comment, isChecked: !comment.isChecked };
+      } else if (comment.isChecked) {
+        // Uncheck any other previously checked comment
+        return { ...comment, isChecked: false };
+      }
+      return comment;
+    });
+
+    const updatedThread = {
+      ...thread,
+      comments: updatedComments,
+    };
+
+    try {
+      const docRef = doc(db, 'threads', thread.id);
+      await updateDoc(docRef, { comments: updatedThread.comments });
+      setThread(updatedThread);
+      setCheckedCommentId(prevId => (prevId === commentId ? null : commentId));
+    } catch (error) {
+      console.error('Error updating comment in Firestore:', error);
+    }
+  }
+};
 
   if (!thread) {
     return <p className="text-red-500 text-center text-8xl">Thread not found.</p>;
@@ -78,9 +118,9 @@ const ThreadDetail = () => {
               <div className="my-4 p-9">
                 {thread.comments.map(comment => (
                   <div key={comment.id} className="mb-4">
-                    <p className={`rounded p-2 text-teal-900 ${checkedCommentId === comment.id ? 'bg-green-200 border border-green-500' : 'bg-slate-200'}`}>                        
+                    <p className={`rounded p-2 text-teal-900 ${checkedCommentId === comment.id ? 'bg-green-200 border border-green-500' : 'bg-slate-200'}`}>
                       {comment.content}
-                      {thread.category === "QNA" && (
+                      {thread.category === "QNA" && isLoggedIn && (
                         <button
                           className={`ml-2 float-right ${checkedCommentId === comment.id ? 'text-green-500' : 'text-red-500'}`}
                           onClick={() => toggleCheckComment(comment.id)}
@@ -93,23 +133,29 @@ const ThreadDetail = () => {
                     <p className="text-white">{comment.creator.userName}</p>
                   </div>
                 ))}
-                {!thread.locked && (
-                  <>
-                    <hr className="mt-7" />
-                    <div className='relative flex items-center right-5 mt-2 w-[600px]'>
-                      <div
-                        className="text-white bg-white m-4 p-5 rounded-md w-[800px] h-[80px] border border-white-300"
-                        contentEditable
-                        onInput={(e) => setComment((e.target as HTMLDivElement).innerText)}
-                      />
-                      <button
-                        className="mt-2 bg-blue-500 text-white px-3 rounded"
-                        onClick={handleAddComment}
-                      >
-                        Add Comment
-                      </button>
-                    </div>
-                  </>
+                {thread.locked ? (
+                  <div className="mt-7 p-4 bg-red-500 text-white rounded">
+                    This thread is locked. No comments can be made.
+                  </div>
+                ) : (
+                  isLoggedIn && (
+                    <>
+                      <hr className="mt-7" />
+                      <div className='relative flex items-center right-5 mt-2 w-[600px]'>
+                        <div
+                          className="text-black bg-white m-4 p-5 rounded-md w-[800px] h-[80px] border border-white-300"
+                          contentEditable
+                          onInput={(e) => setComment((e.target as HTMLDivElement).innerText)}
+                        />
+                        <button
+                          className="mt-2 bg-black text-white px-3 rounded"
+                          onClick={handleAddComment}
+                        >
+                          Add Comment
+                        </button>
+                      </div>
+                    </>
+                  )
                 )}
               </div>
             </div>
