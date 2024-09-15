@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/firebase/config';
+import { auth, db } from '@/firebase/config';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
+import { onAuthStateChanged } from 'firebase/auth';
 
 
 const ListThreads = () => {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hoveredThreadId, setHoveredThreadId] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
 
   useEffect(() => {
     const fetchThreads = async () => {
@@ -26,11 +29,18 @@ const ListThreads = () => {
     fetchThreads();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const deleteThread = async (threadId: string) => {
     try {
-      await deleteDoc(doc(db, "threads" , threadId))
-      console.log("deleting thread" , threadId)
+      await deleteDoc(doc(db, "threads", threadId))
+      console.log("deleting thread", threadId)
       const updatedThreads = threads.filter(thread => thread.id !== threadId);
       setThreads(updatedThreads);
     } catch (error) {
@@ -52,7 +62,7 @@ const ListThreads = () => {
       setError('Error locking thread in Firestore.');
     }
   };
-    const handleMouseEnter = (id: string) => {
+  const handleMouseEnter = (id: string) => {
     setHoveredThreadId(id);
   };
 
@@ -71,31 +81,33 @@ const ListThreads = () => {
               <div key={thread.id} className="flex justify-between rounded items-center mb-4 p-4 border border-white w-full max-w-4xl">
                 <Link href={`/threads/${thread.id}`}>{thread.title}</Link>
                 <p className="mt-2 text-sm">{thread.category}</p>
-                <div className="flex items-center">
-                  <p className="text-sm text-slate-500">{new Date(thread.creationDate).toLocaleString()}</p>
-                  <div
-                    className="relative"
-                    onMouseEnter={() => handleMouseEnter(thread.id)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    <FontAwesomeIcon
-                      icon={thread.locked ? faLockOpen : faLock}
-                      className={`ml-2 w-4 h-4 cursor-pointer text-black ${thread.locked ? 'opacity-50' : ''}`}
-                      onClick={() => toggleLockThread(thread.id)}
-                    />
-                    {hoveredThreadId === thread.id && thread.locked && (
-                      <div className="absolute top-0 left-0 mt-6 ml-2 p-2 bg-gray-700 text-white text-xs rounded">
-                        Open Thread
-                      </div>
-                    )}
+                <p className="text-sm text-slate-500">{new Date(thread.creationDate).toLocaleString()}</p>
+                {isLoggedIn && (
+                  <div className="flex items-center">
+                    <div
+                      className="relative"
+                      onMouseEnter={() => handleMouseEnter(thread.id)}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      <FontAwesomeIcon
+                        icon={thread.locked ? faLockOpen : faLock}
+                        className={`ml-2 w-4 h-4 cursor-pointer text-black ${thread.locked ? 'opacity-50' : ''}`}
+                        onClick={() => toggleLockThread(thread.id)}
+                      />
+                      {hoveredThreadId === thread.id && thread.locked && (
+                        <div className="absolute top-0 left-0 mt-6 ml-2 p-2 bg-gray-700 text-white text-xs rounded">
+                          Open Thread
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      className="ml-2 text-red-500 text-sm"
+                      onClick={() => deleteThread(thread.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
-                  <button
-                    className="ml-2 text-red-500 text-sm"
-                    onClick={() => deleteThread(thread.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
+                )}
               </div>
             ))
           )}
