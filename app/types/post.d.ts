@@ -29,4 +29,5 @@ type ThreadComment = {
   thread: string;
   content: string;
   creator: User;
+  isChecked: boolean;
 }
