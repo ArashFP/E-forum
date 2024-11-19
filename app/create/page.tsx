@@ -9,6 +9,7 @@ export default function Create() {
         <div className="m-5 w-1/2 mx-auto">
           <div className="font-bold text-start text-xl px-5">
             <h2 className="font-bold text-start text-3xl mt-10 mb-2 text-white">Begin topic</h2>
+            <p>test</p>
             <CreateThread />
           </div>
         </div>
